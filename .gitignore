@@ -2,3 +2,6 @@
 temp_frontend_env.txt
 
 frontend/.env.bak
+
+backend/.env.bak
+backend/.env.example
