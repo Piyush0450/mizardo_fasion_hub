@@ -1,0 +1,100 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom luxury theme */
+:root {
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+  --brand-green: #1DB954;
+}
+
+html,
+body,
+#root {
+  height: 100%
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-brand-black text-brand-white font-sans antialiased transition-colors duration-300;
+  }
+
+  /* Light Mode Overrides */
+  html.light body {
+    @apply bg-brand-light-bg text-brand-light-text;
+  }
+
+  html.light h1,
+  html.light h2,
+  html.light h3,
+  html.light h4,
+  html.light h5,
+  html.light h6 {
+    @apply text-brand-light-heading;
+  }
+}
+
+/* Utility Classes */
+.text-accent {
+  @apply text-brand-green;
+}
+
+.bg-accent {
+  @apply bg-brand-green;
+}
+
+.border-accent {
+  @apply border-brand-green;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-green text-white font-bold px-8 py-3 rounded-full hover:bg-brand-neon hover:shadow-glow transition-all duration-300 transform hover:-translate-y-1 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-brand-green text-brand-green font-bold px-8 py-3 rounded-full hover:bg-brand-green hover:text-white transition-all duration-300;
+  }
+
+  /* Light Mode Button Overrides */
+  html.light .btn-secondary {
+    @apply bg-white border-2 border-brand-green text-brand-green hover:bg-brand-green hover:text-white;
+  }
+
+  .card {
+    @apply bg-brand-dark rounded-2xl border border-gray-800/50 hover:border-brand-green/50 hover:shadow-glow transition-all duration-300;
+  }
+
+  html.light .card {
+    @apply bg-white border-gray-200 shadow-card hover:shadow-xl hover:border-brand-green;
+  }
+
+  .input-field {
+    @apply w-full bg-brand-dark border border-gray-800 rounded-xl p-3 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green transition-all duration-300;
+  }
+
+  html.light .input-field {
+    @apply bg-white border-gray-300 text-brand-light-text;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-brand-black;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-800 rounded-full hover:bg-brand-green;
+}
