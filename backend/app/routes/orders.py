@@ -26,7 +26,9 @@ async def create_order(order_in: OrderIn):
     
     # Create Razorpay Order if method is razorpay
     if order_in.payment_method == 'razorpay':
+        print(f"DEBUG: Processing Razorpay order for user {order_in.user_id}")
         if 'placeholder' in RAZORPAY_KEY_ID or 'placeholder' in RAZORPAY_KEY_SECRET:
+             print("DEBUG: DEFAULT KEYS FOUND - THIS WILL FAIL")
              raise HTTPException(status_code=500, detail="Payment Gateway Configuration Error: Invalid Keys")
              
         try:
@@ -35,7 +37,9 @@ async def create_order(order_in: OrderIn):
                 "currency": "INR",
                 "receipt": f"order_{datetime.utcnow().timestamp()}"
             }
+            print(f"DEBUG: Creating Razorpay order with data: {data}")
             rzp_order = client.order.create(data=data)
+            print(f"DEBUG: Razorpay order created: {rzp_order}")
             order_dict['razorpay_order_id'] = rzp_order['id']
         except Exception as e:
             print(f"Razorpay Error: {e}")

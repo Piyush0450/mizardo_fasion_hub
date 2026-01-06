@@ -73,14 +73,20 @@ export default function Login() {
                             required
                         />
                     </div>
+                    <div className="flex justify-end">
+                        <Link to="/forgot-password" className="text-xs text-brand-green hover:underline">
+                            Forgot Password?
+                        </Link>
+                    </div>
                     <button type="submit" className="w-full bg-brand-green text-white font-bold py-3 rounded-full hover:bg-brand-neon hover:shadow-glow transition-all">
                         Log In
                     </button>
+
                 </form>
                 <p className="mt-4 text-center text-gray-400 text-sm">
                     Don't have an account? <Link to="/register" className="text-brand-green hover:underline">Sign up</Link>
                 </p>
             </motion.div>
-        </div>
+        </div >
     );
 }

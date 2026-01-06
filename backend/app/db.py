@@ -4,8 +4,8 @@ import os
 
 from pathlib import Path
 
-# Load .env from root directory
-env_path = Path(__file__).resolve().parents[2] / '.env'
+# Load .env from backend directory
+env_path = Path(__file__).resolve().parents[1] / '.env'
 load_dotenv(dotenv_path=env_path)
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")

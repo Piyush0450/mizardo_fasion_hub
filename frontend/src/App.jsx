@@ -10,7 +10,7 @@ import Register from './pages/Register'
 import Profile from './pages/Profile'
 import Wishlist from './pages/Wishlist'
 import AdminDashboard from './pages/AdminDashboard'
-import CheckoutPage from './pages/CheckoutPage'
+import Checkout from './pages/Checkout'
 import Notifications from './pages/Notifications'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
@@ -21,6 +21,8 @@ import { ThemeProvider } from './context/ThemeContext'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
 import { NotificationProvider } from './context/NotificationContext'
+
+import ForgotPassword from './pages/ForgotPassword'
 
 export default function App() {
   return (
@@ -40,8 +42,14 @@ export default function App() {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+
                     <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/checkout-page" element={<CheckoutPage />} />
+                    <Route path="/checkout" element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-of-service" element={<TermsOfService />} />
 

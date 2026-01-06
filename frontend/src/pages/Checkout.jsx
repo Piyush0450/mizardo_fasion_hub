@@ -73,8 +73,13 @@ export default function Checkout() {
                 return;
             }
 
+            console.log("DEBUG: Order Response:", order);
+            const keyId = "rzp_test_RokO9SEU1KkXGY"; // Hardcoded for debugging to ensure no env issues
+            console.log("DEBUG: Using Razorpay Key:", keyId);
+            console.log("DEBUG: Order ID:", order.razorpay_order_id);
+
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder", // Fallback for dev
+                key: keyId,
                 amount: order.total_amount * 100,
                 currency: "INR",
                 name: "Mizardo Luxury",

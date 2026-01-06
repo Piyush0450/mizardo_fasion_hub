@@ -19,8 +19,17 @@ router = APIRouter()
 try:
     firebase_admin.get_app()
 except ValueError:
-    # firebase_admin.initialize_app() # Initialize without creds (works on GCP) or use placeholder
-    pass
+    # Construct path to serviceAccountKey.json in the root 'backend' folder
+    # backend/app/routes/auth.py -> backend/
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    cred_path = os.path.join(base_dir, "mizardo-9d454-firebase-adminsdk-fbsvc-da2092f14c.json")
+    
+    if os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred)
+        print(f"✅ Firebase Admin initialized with credentials from {os.path.basename(cred_path)}")
+    else:
+        print(f"⚠️ Service account key not found at {cred_path}. Firebase functionality may be limited.")
 
 class TokenSchema(BaseModel):
     token: str
@@ -247,3 +256,121 @@ async def delete_address(address_id: str, current_user: dict = Depends(get_curre
         {"$pull": {"addresses": {"id": address_id}}}
     )
     return {"status": "success", "message": "Address deleted"}
+
+# --- Forgot Password / OTP Flow ---
+
+import random
+import string
+from datetime import timedelta
+from ..services.email import send_email
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class VerifyOTPRequest(BaseModel):
+    email: str
+    otp: str
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    email = request.email
+    
+    # Check if user exists in our DB
+    user = await db.users.find_one({"email": email})
+    if not user:
+        # Security: Don't reveal if user exists
+        return {"status": "success", "message": "If this email is registered, an OTP has been sent."}
+    
+    # Generate 6-digit OTP
+    otp = ''.join(random.choices(string.digits, k=6))
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+    
+    # Store OTP in DB (upsert)
+    await db.password_resets.update_one(
+        {"email": email},
+        {"$set": {
+            "otp": otp,
+            "expires_at": expires_at,
+            "verified": False
+        }},
+        upsert=True
+    )
+    
+    # Send Email
+    subject = "Your Mizardo Password Reset OTP"
+    text = f"Your OTP for password reset is: {otp}. It expires in 10 minutes."
+    
+    # Debug OTP - Removed
+    # try:
+    #     with open("debug_otp.txt", "w") as f:
+    #         f.write(otp)
+    # except:
+    #     pass
+
+    html = f"""
+    <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Password Reset Request</h2>
+        <p>You requested to reset your password for Mizardo.</p>
+        <p>Your OTP is:</p>
+        <h1 style="color: #00ff88; background: #000; padding: 10px; display: inline-block;">{otp}</h1>
+        <p>This OTP expires in 10 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+    </div>
+    """
+    
+    # Run in background or await? Using await for simplicity in this step
+    await send_email(to=email, subject=subject, text=text, html=html)
+    
+    return {"status": "success", "message": "OTP sent to your email."}
+
+@router.post("/verify-otp")
+async def verify_otp(request: VerifyOTPRequest):
+    record = await db.password_resets.find_one({"email": request.email})
+    
+    if not record:
+        raise HTTPException(status_code=400, detail="Invalid OTP or request expired")
+        
+    if datetime.utcnow() > record["expires_at"]:
+        raise HTTPException(status_code=400, detail="OTP expired")
+        
+    if record["otp"] != request.otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+        
+    # Mark as verified (optional, or just allow reset immediately with OTP)
+    # Ideally should return a temporary reset token, but for simplicity we verify OTP again in reset
+    
+    return {"status": "success", "message": "OTP verified successfully"}
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    # Verify OTP again to be secure (stateless verify)
+    record = await db.password_resets.find_one({"email": request.email})
+    
+    if not record or record["otp"] != request.otp:
+         raise HTTPException(status_code=400, detail="Invalid session or OTP")
+         
+    if datetime.utcnow() > record["expires_at"]:
+        raise HTTPException(status_code=400, detail="OTP expired")
+
+    try:
+        # Get Firebase UID from email
+        user_record = auth.get_user_by_email(request.email)
+        uid = user_record.uid
+        
+        # Update user in Firebase
+        auth.update_user(uid, password=request.new_password)
+        
+        # Clear the OTP record
+        await db.password_resets.delete_one({"email": request.email})
+        
+        return {"status": "success", "message": "Password reset successfully. You can now login."}
+        
+    except Exception as e:
+        print(f"Error resetting password: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update password. Please try again.")
+

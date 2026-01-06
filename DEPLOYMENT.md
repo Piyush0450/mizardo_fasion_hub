@@ -42,3 +42,22 @@ This guide describes how to deploy the Mizardo application.
 ## 4. Final Steps
 - Once both are deployed, verify the frontend can communicate with the backend.
 - Update the frontend `VITE_API_URL` variable in Vercel to match the actual Render backend URL if you haven't already.
+
+## 5. Troubleshooting
+
+### Vercel Deployment Failed ("React only" error or 404)
+If your deployment fails or you see a 404 error, checks these settings:
+
+1.  **Root Directory**:
+    - Go to your Vercel Project Settings > General.
+    - Ensure **Root Directory** is set to `frontend`.
+    - If it's set to `./` (the root), Vercel won't find `package.json` and will fail or default to a static site.
+
+2.  **Framework Preset**:
+    - Ensure it is set to **Vite** (or "Other").
+    - Do **NOT** set it to "Create React App" unless you are actually using it (this project uses Vite).
+
+3.  **Build Command**:
+    - If `Root Directory` is `frontend`, the default `vite build` or `npm run build` should work automatically.
+    - If you are deploying from the root (not recommended), you would need `cd frontend && npm install && npm run build`. Setting the Root Directory is the better solution.
+

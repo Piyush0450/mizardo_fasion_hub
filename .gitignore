@@ -5,3 +5,45 @@ frontend/.env.bak
 
 backend/.env.bak
 backend/.env.example
+
+# Environment files
+.env
+.env.backup
+backend/.env
+
+# Logs
+*.log
+backend/backend_debug.log
+backend/debug_*.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node modules
+node_modules/
+
+# Firebase
+*.json
+!package.json
+!firebase.json
+!firestore.rules
+!storage.rules
+!database.rules.json
+!firestore.indexes.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
